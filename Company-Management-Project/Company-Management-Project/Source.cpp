@@ -2,6 +2,7 @@
 #include <vector>
 #include <fstream>
 #include<string>
+#include <algorithm>
 
 using namespace std;
 
@@ -112,6 +113,15 @@ void add_new_news_info() {
 		if (id_exist) {
 			break;
 		}
+		string exit;
+		cout << "\nAre You Want To Exit (no/yes)?";
+		getline(cin,exit);
+		if (exit == "No" || exit == "no" || exit == "n" || exit == "N") {
+			continue;
+		}
+		else if (exit == "Yes" || exit == "yes" || exit == "y" || exit == "Y") {
+			return;
+		}
 		cout << "\nPlease Choose From Exist ID\n";
 	}
 	add_to_news_file(news.title, news.publish_date, news.brief, news.project_id,info[stoi(news.project_id)-1][0], "data/News.txt");
@@ -196,7 +206,7 @@ void display_data_of_projects(vector<vector<string>> info) {
 
 		cout << "--------Project Brief => " << info[i][3] << endl;
 
-		cout << "--------Project ID => " << info[i][4] << endl;
+		cout << "--------Project ID => " << info[i][info[i].size()-1] << endl;
 	}
 	cout << endl;
 }
@@ -214,11 +224,11 @@ void display_data_of_news(vector<vector<string>> info) {
 
 		cout << "--------News Brief => " << info[i][2] << endl;
 
-		cout << "--------Project ID => " << info[i][3] << endl;
+		cout << "--------Project ID => " << info[i][info[i].size() - 3] << endl;
 
-		cout << "--------Project Title => " << info[i][4] << endl;
+		cout << "--------Project Title => " << info[i][info[i].size() - 2] << endl;
 
-		cout << "--------News ID => " << info[i][5] << endl;
+		cout << "--------News ID => " << info[i][info[i].size() - 1] << endl;
 
 	}
 	cout << endl;
@@ -239,6 +249,7 @@ void clear_all_news_data() {
 	ofs.close();
 	cout << "\n-----Deleted All News Data Success-----\n";
 }
+
 
 
 
@@ -312,12 +323,12 @@ vector<vector<string>> filter_projects_by_user() {
 			}
 		}
 		else if (number == 4) {
-			if (info_project[i][4] == chosen) {
+			if (info_project[i][info_project[i].size() - 1] == chosen) {
 				info_project_filter.push_back(info_project[i]);
 			}
 		}
 	}
-	cout << "-------Result Of Filter-------";
+	cout << "-------Result Of Filter-------\n\n";
 	return info_project_filter;
 }
 vector<vector<string>> filter_news_by_user() {
@@ -396,10 +407,9 @@ vector<vector<string>> filter_news_by_user() {
 			}
 		}
 	}
-	cout << "-------Result Of Filter-------";
+	cout << "-------Result Of Filter-------\n\n";
 	return info_news_filter;
 }
-
 
 
 
@@ -422,7 +432,6 @@ vector<string> split_string_by_space(string str) {
 
 
 
-
 //Read Data From External Files
 vector<string> read_data_from_File(string filePath) {
 	vector<string> fileLines;
@@ -441,7 +450,6 @@ vector<string> read_data_from_File(string filePath) {
 
 
 
-
 //System Run Function
 void system() {
 	int number = 0;
@@ -454,8 +462,8 @@ void system() {
 		cout << "Enter 2 if you want to add new news." << endl;
 		cout << "Enter 3 if you want to display all projects on screen." << endl;
 		cout << "Enter 4 if you want to display all news on screen." << endl;
-		cout << "Enter 5 if you want to search for project." << endl;
-		cout << "Enter 6 if you want to search for news." << endl;
+		cout << "Enter 5 if you want to filter projects." << endl;
+		cout << "Enter 6 if you want to filter news." << endl;
 		cout << "Enter 7 if you want to clear all data of projects." << endl;
 		cout << "Enter 8 if you want to clear all data of news." << endl;
 		cout << "Enter 9 if you want to exit." << endl;
@@ -495,6 +503,9 @@ void system() {
 		else if (number == 8) {
 			clear_all_news_data();
 			cout << "-------------------------------------------" << endl << endl;
+		}
+		else {
+			break;
 		}
 	}
 }
