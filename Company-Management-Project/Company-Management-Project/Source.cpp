@@ -6,6 +6,11 @@
 
 using namespace std;
 
+#define size_project 4
+
+#define size_news 4
+
+
 struct new_project {
 	string title;
 	string start_date;
@@ -26,8 +31,8 @@ void add_new_news_info();
 
 
 //Add Data To External Files
-void add_to_projects_file(string title, string start_date, string end_date, string brief, string filePath);
-void add_to_news_file(string title, string publish_date, string brief, string project_id,string project_title, string filePath);
+void add_to_projects_file(string arr_project[4], string filePath);
+void add_to_news_file(string arr_news[4], string project_title, string filePath);
 
 
 //Clear All Data Of External Files
@@ -48,6 +53,11 @@ void display_data_of_news(vector<vector<string>> info);
 //Listing Data By Filter by User
 vector<vector<string>> filter_projects_by_user();
 vector<vector<string>> filter_news_by_user();
+
+
+//Delete item From file
+void delete_project();
+void delete_news();
 
 
 //Split String By Space
@@ -73,36 +83,52 @@ int main() {
 
 //Add New Project And News
 void add_new_project_info() {
+	string arr_project[size_project];
 	vector<string> data;
 	new_project project;
+
+	//Avoid Error
 	getline(cin, project.title);
+
 	cout << "Enter New Project Title : ";
 	getline(cin, project.title);
+	arr_project[0] = project.title;
 	cout << "Enter Start Date : ";
 	getline(cin, project.start_date);
+	arr_project[1] = project.start_date;
 	cout << "Enter End Date : ";
 	getline(cin, project.end_date);
+	arr_project[2] = project.end_date;
 	cout << "Enter a Brief : ";
 	getline(cin, project.brief);
-	add_to_projects_file(project.title, project.start_date, project.end_date, project.brief, "data/Projects.txt");
+	arr_project[3] = project.brief;
+	add_to_projects_file(arr_project, "data/Projects.txt");
 }
 void add_new_news_info() {
+	string arr_news[size_news];
 	vector<vector<string>> info = data_projects_handle();
 	vector<string> data;
 	new_news news;
 	bool id_exist = false;
+
+	//Avoid Error
 	getline(cin, news.title);
+
 	cout << "Enter New News Title : ";
 	getline(cin, news.title);
+	arr_news[0] = news.title;
 	cout << "Enter Publish Date : ";
 	getline(cin, news.publish_date);
+	arr_news[1] = news.publish_date;
 	cout << "Enter Brief : ";
 	getline(cin, news.brief);
+	arr_news[2] = news.brief;
 	cout << "\nProject IDs : \n";
 	while (true) {
 		display_data_of_projects(info);
 		cout << "\nchoose Your Project Id : ";
 		getline(cin, news.project_id);
+		arr_news[3] = news.project_id;
 		id_exist = false;
 		for (int i = 0;i < info.size();i++) {
 			if (news.project_id == info[i][4]) {
@@ -115,7 +141,7 @@ void add_new_news_info() {
 		}
 		string exit;
 		cout << "\nAre You Want To Exit (no/yes)?";
-		getline(cin,exit);
+		getline(cin, exit);
 		if (exit == "No" || exit == "no" || exit == "n" || exit == "N") {
 			continue;
 		}
@@ -124,23 +150,23 @@ void add_new_news_info() {
 		}
 		cout << "\nPlease Choose From Exist ID\n";
 	}
-	add_to_news_file(news.title, news.publish_date, news.brief, news.project_id,info[stoi(news.project_id)-1][0], "data/News.txt");
+	add_to_news_file(arr_news, info[stoi(news.project_id) - 1][0], "data/News.txt");
 }
 
 
 
 //Add Data To External Files
-void add_to_projects_file(string title, string start_date, string end_date,string brief, string filePath) {
+void add_to_projects_file(string arr_project[4], string filePath) {
 	ofstream myfile;
 	myfile.open(filePath, ios::out | ios::app);
-	myfile << title << endl << start_date << endl << end_date << endl << brief << "\n";
+	myfile << arr_project[0] << endl << arr_project[1] << endl << arr_project[2] << endl << arr_project[3] << "\n--finish--\n";
 	myfile.close();
 	cout << "\nAdded Successfully" << endl << endl;
 }
-void add_to_news_file(string title, string publish_date, string brief,string project_id,string project_title, string filePath) {
+void add_to_news_file(string arr_news[4], string project_title, string filePath) {
 	ofstream myfile;
 	myfile.open(filePath, ios::out | ios::app);
-	myfile << title << endl << publish_date << endl << brief << endl << project_id << endl << project_title <<"\n";
+	myfile << arr_news[0] << endl << arr_news[1] << endl << arr_news[2] << endl << arr_news[3] << endl << project_title << "\n--finish--\n";
 	myfile.close();
 	cout << "\nAdded Successfully" << endl << endl;
 }
@@ -152,17 +178,16 @@ vector<vector<string>> data_projects_handle() {
 	vector<string> data = read_data_from_File("data/Projects.txt");
 	vector<vector<string>> info;
 	vector<string> project;
-	int id=0;
-	int count = 0;
+	int id = 0;
 	for (int i = 0;i < data.size();i++) {
-		count += 1;
-		project.push_back(data[i]);
-		if (count == 4) {
-			count = 0;
+		if (data[i] == "--finish--") {
 			id += 1;
 			project.push_back(to_string(id));
 			info.push_back(project);
 			project.clear();
+		}
+		else{
+			project.push_back(data[i]);
 		}
 	}
 	return info;
@@ -172,16 +197,15 @@ vector<vector<string>> data_news_handle() {
 	vector<vector<string>> info;
 	vector<string> news;
 	int id = 0;
-	int count = 0;
 	for (int i = 0;i < data.size();i++) {
-		count += 1;
-		news.push_back(data[i]);
-		if (count == 5) {
-			count = 0;
+		if (data[i] == "--finish--") {
 			id += 1;
 			news.push_back(to_string(id));
 			info.push_back(news);
 			news.clear();
+		}
+		else {
+			news.push_back(data[i]);
 		}
 	}
 	return info;
@@ -206,7 +230,7 @@ void display_data_of_projects(vector<vector<string>> info) {
 
 		cout << "--------Project Brief => " << info[i][3] << endl;
 
-		cout << "--------Project ID => " << info[i][info[i].size()-1] << endl;
+		cout << "--------Project ID => " << info[i][info[i].size() - 1] << endl;
 	}
 	cout << endl;
 }
@@ -241,15 +265,78 @@ void clear_all_projects_data() {
 	ofstream ofs;
 	ofs.open("data/Projects.txt", ofstream::out | ofstream::trunc);
 	ofs.close();
-	cout << "\n-----Deleted All Project Data Success-----\n";
 }
 void clear_all_news_data() {
 	ofstream ofs;
 	ofs.open("data/News.txt", ofstream::out | ofstream::trunc);
 	ofs.close();
-	cout << "\n-----Deleted All News Data Success-----\n";
 }
 
+
+
+//Delete item From file
+void delete_project() {
+	vector<string> data = read_data_from_File("data/Projects.txt");
+	vector<vector<string>> info = data_projects_handle();
+	display_data_of_projects(info);
+	string Id;
+
+	//Avoid Error
+	getline(cin, Id);
+
+	cout << "Enter Project ID That You Want To Delete : ";
+	getline(cin, Id);
+	int ID = stoi(Id);
+	if ( ID && info.size() >= ID && ID > 0) {
+		info.erase(info.begin() + (ID - 1));
+		clear_all_projects_data();
+		for (int i = 0;i < info.size();i++) {
+			ofstream myfile;
+			myfile.open("data/Projects.txt", ios::out | ios::app);
+			myfile << info[i][0] << endl << info[i][1] << endl << info[i][2] << endl << info[i][3] << "\n--finish--\n";
+			myfile.close();
+		}
+		cout << "\nProject Deleted Successfully" << endl << endl;
+		return;
+	}
+	else {
+		cout << "Project ID is'nt exist, Please Choose From Above IDs\n";
+
+		//Recursion
+		delete_project();
+	}
+}
+void delete_news() {
+	vector<string> data = read_data_from_File("data/News.txt");
+	vector<vector<string>> info = data_news_handle();
+	display_data_of_news(info);
+	string Id;
+
+	//Avoid Error
+	getline(cin, Id);
+
+	cout << "Enter News ID That You Want To Delete : ";
+	getline(cin, Id);
+	int ID = stoi(Id);
+	if (ID && info.size() >= ID && ID > 0) {
+		info.erase(info.begin() + (ID - 1));
+		clear_all_news_data();
+		for (int i = 0;i < info.size();i++) {
+			ofstream myfile;
+			myfile.open("data/News.txt", ios::out | ios::app);
+			myfile << info[i][0] << endl << info[i][1] << endl << info[i][2] << endl << info[i][3] <<info[i][4] << "\n--finish--\n";
+			myfile.close();
+		}
+		cout << "\News Deleted Successfully" << endl << endl;
+		return;
+	}
+	else {
+		cout << "News ID is'nt exist, Please Choose From Above IDs\n";
+
+		//Recursion
+		delete_news();
+	}
+}
 
 
 
@@ -301,7 +388,7 @@ vector<vector<string>> filter_projects_by_user() {
 			cout << "\nPlease Choose Correct Number....\n";
 		}
 	}
-	
+
 
 	for (int i = 0;i < info_project.size();i++) {
 		if (number == 0) {
@@ -328,7 +415,7 @@ vector<vector<string>> filter_projects_by_user() {
 			}
 		}
 	}
-	cout << "-------Result Of Filter-------\n\n";
+	cout << "\n-------Result Of Filter-------\n";
 	return info_project_filter;
 }
 vector<vector<string>> filter_news_by_user() {
@@ -357,7 +444,7 @@ vector<vector<string>> filter_news_by_user() {
 			vector<vector<string>> info = data_news_handle();
 			bool id_exist = false;
 			for (int i = 0;i < info.size();i++) {
-				cout <<endl<< i + 1 << "-news :\n";
+				cout << endl << i + 1 << "-news :\n";
 				cout << "--------Project Title => " << info[i][4] << endl;
 
 				cout << "--------Project ID => " << info[i][3] << endl;
@@ -376,7 +463,7 @@ vector<vector<string>> filter_news_by_user() {
 				}
 				cout << "\nPlease Choose From Exist IDs\n";
 			}
-			
+
 			break;
 		}
 		else {
@@ -388,7 +475,7 @@ vector<vector<string>> filter_news_by_user() {
 			break;
 		}
 		else if (number == 1) {
-			if (info_news[i][4] == chosen ) {
+			if (info_news[i][4] == chosen) {
 				info_news_filter.push_back(info_news[i]);
 			}
 			else {
@@ -407,7 +494,7 @@ vector<vector<string>> filter_news_by_user() {
 			}
 		}
 	}
-	cout << "-------Result Of Filter-------\n\n";
+	cout << "\n-------Result Of Filter-------\n";
 	return info_news_filter;
 }
 
@@ -452,10 +539,10 @@ vector<string> read_data_from_File(string filePath) {
 
 //System Run Function
 void system() {
-	int number = 0;
+	string number ;
 	vector<vector<string>> info_project = data_projects_handle();
 	vector<vector<string>> info_news = data_news_handle();
-	while (number != 9) {
+	while (number != "exist" || number != "Exist") {
 		info_project = data_projects_handle();
 		info_news = data_news_handle();
 		cout << "Enter 1 if you want to add new project." << endl;
@@ -466,46 +553,61 @@ void system() {
 		cout << "Enter 6 if you want to filter news." << endl;
 		cout << "Enter 7 if you want to clear all data of projects." << endl;
 		cout << "Enter 8 if you want to clear all data of news." << endl;
-		cout << "Enter 9 if you want to exit." << endl;
-		cout <<"\nYou Chosen Number : ";
+		cout << "Enter 9 if you want to Delete Project." << endl;
+		cout << "Enter 10 if you want to Delete news." << endl;
+		cout << "Enter exist if you want to exit." << endl;
+		cout << "\nYou Chosen Number : ";
 		cin >> number;
 
-		if (number == 1) {
+		if (number == "1") {
 			add_new_project_info();
 			cout << "-------------------------------------------" << endl << endl;
 		}
-		else if (number == 2) {
+		else if (number == "2") {
 			add_new_news_info();
 			cout << "-------------------------------------------" << endl << endl;
 		}
-		else if (number == 3) {
+		else if (number == "3") {
 			display_data_of_projects(info_project);
 			cout << "-------------------------------------------" << endl << endl;
 		}
-		else if (number == 4) {
-		    display_data_of_news(info_news);
+		else if (number == "4") {
+			display_data_of_news(info_news);
 			cout << "-------------------------------------------" << endl << endl;
 		}
-		else if (number == 5) {
+		else if (number == "6") {
 			info_project = filter_projects_by_user();
 			display_data_of_projects(info_project);
 			cout << "-------------------------------------------" << endl << endl;
 		}
-		else if (number == 6) {
+		else if (number == "7") {
 			info_news = filter_news_by_user();
 			display_data_of_news(info_news);
 			cout << "-------------------------------------------" << endl << endl;
 		}
-		else if (number == 7) {
+		else if (number == "7") {
 			clear_all_projects_data();
+			cout << "\n-----Deleted All Project Data Success-----\n";
 			cout << "-------------------------------------------" << endl << endl;
 		}
-		else if (number == 8) {
+		else if (number == "8") {
 			clear_all_news_data();
+			cout << "\n-----Deleted All News Data Success-----\n";
+			cout << "-------------------------------------------" << endl << endl;
+		}
+		else if (number == "9") {
+			delete_project();
+			cout << "-------------------------------------------" << endl << endl;
+		}
+		else if (number == "10") {
+			delete_news();
 			cout << "-------------------------------------------" << endl << endl;
 		}
 		else {
-			break;
+			cout << "\nPlease Choose Correct Number!!\n\n";
+
+			//Recursion
+			system();
 		}
 	}
 }
